@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "loom-plugin",
+  "description": "LOOM orchestrator plugin for Claude Code — agent coordination via git worktrees",
+  "owner": {
+    "name": "bitswell",
+    "url": "https://github.com/bitswell"
+  },
+  "plugins": [
+    {
+      "name": "loom",
+      "description": "LOOM orchestrator — coordinate AI agents through git worktrees with protocol enforcement hooks",
+      "source": "./plugins/loom",
+      "category": "development"
+    }
+  ]
+}

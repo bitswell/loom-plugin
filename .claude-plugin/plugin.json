@@ -1,0 +1,12 @@
+{
+  "name": "loom",
+  "version": "0.1.0",
+  "description": "LOOM orchestrator — coordinate AI agents through git worktrees",
+  "author": {
+    "name": "bitswell",
+    "url": "https://github.com/bitswell"
+  },
+  "repository": "https://github.com/bitswell/loom-plugin",
+  "license": "MIT",
+  "keywords": ["loom", "orchestrator", "agents", "worktrees", "coordination"]
+}

@@ -88,6 +88,7 @@ All trailers follow `git-interpret-trailers(1)` syntax.
 | `Key-Finding` | string | Important discovery. Repeatable. At least one REQUIRED. |
 | `Decision` | string | Non-obvious choice, format `<what> -- <why>`. Repeatable. OPTIONAL. |
 | `Deviation` | string | Departure from task spec, format `<what> -- <why>`. Repeatable. OPTIONAL. |
+| `Scope-Expand` | string | Out-of-scope file modification request, format `<path> -- <reason>`. Repeatable. OPTIONAL. See §3.6. |
 
 ### 3.5 Error trailers (BLOCKED and FAILED commits)
 
@@ -96,6 +97,22 @@ All trailers follow `git-interpret-trailers(1)` syntax.
 | `Blocked-Reason` | string | What is preventing progress. REQUIRED on BLOCKED. |
 | `Error-Category` | enum | `task_unclear`, `blocked`, `resource_limit`, `conflict`, `internal`. REQUIRED on FAILED. |
 | `Error-Retryable` | boolean | `true` or `false`. REQUIRED on FAILED. |
+
+### 3.6 Scope-expansion trailers
+
+| Trailer | Type | Description |
+|---------|------|-------------|
+| `Scope-Expand` | string | Request to modify one file outside `scope.paths_allowed`. Format: `<path> -- <reason>`. Repeatable — one trailer per file, multiple per commit. |
+
+**Format:** `Scope-Expand: <path> -- <reason>`
+
+**Constraints:**
+
+1. `<path>` MUST be non-empty and relative to the repository root.
+2. `<reason>` MUST be non-empty. The `--` separator is required between path and reason.
+3. The path MUST NOT match any pattern in `scope.paths_denied`. Denied paths cannot be expanded into — the agent MUST use BLOCKED instead.
+4. One `Scope-Expand` trailer per file. To expand into multiple files, use multiple trailers.
+5. The orchestrator reviews each expansion at integration. The trailer is a request, not a grant.
 
 ---
 

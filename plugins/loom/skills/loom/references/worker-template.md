@@ -240,6 +240,8 @@ commit touches a file outside scope.
 If you discover mid-task that you need to modify out-of-scope files, commit
 BLOCKED and explain the scope expansion needed. Do not proceed.
 
+**Single-file exception:** If you need to modify exactly one file outside scope and can justify the change in a single sentence, you MAY add a `Scope-Expand: <path> -- <reason>` trailer to your work or completion commit instead of going BLOCKED. The path must not match `scope.paths_denied`. The orchestrator reviews each expansion at integration and may reject it. For bulk expansions (multiple unrelated out-of-scope files), use BLOCKED — `Scope-Expand` is for surgical, well-justified cases only.
+
 ---
 
 ## Quick Reference

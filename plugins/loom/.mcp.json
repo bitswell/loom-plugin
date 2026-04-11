@@ -1,0 +1,9 @@
+{
+  "loom": {
+    "command": "npx",
+    "args": ["--prefix", "/home/willem/bitswell/bitswell/repos/bitswell/loom-tools", "loom-tools", "mcp-server"],
+    "env": {
+      "LOOM_ROLE": "orchestrator"
+    }
+  }
+}

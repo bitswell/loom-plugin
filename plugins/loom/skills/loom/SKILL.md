@@ -40,10 +40,30 @@ The 10-step orchestration sequence. The Agent tool is blocking, so use two-phase
       unrealistic estimates. Approve or append a feedback commit to the branch and re-plan.
  8. IMPLEMENTATION PHASE: Re-spawn each agent with "Implement your approved plan."
       Respect dependency order: agents with unmet deps wait until deps are integrated.
- 9. On completion: validate Task-Status is COMPLETED, verify scope, merge --no-ff
-      in dependency order, run project validation after each merge.
+ 9. On completion: validate Task-Status is COMPLETED, verify scope, check for
+      Scope-Expand trailers (see below), merge --no-ff in dependency order,
+      run project validation after each merge.
 10. Read Key-Finding trailers from each agent. Clean up worktrees.
 ```
+
+## Scope-Expand Review (Step 9)
+
+Before merging an agent's branch, check for scope-expansion requests:
+
+```bash
+# Extract all Scope-Expand trailers from the agent's branch
+git log --format='%(trailers:key=Scope-Expand,valueonly)' loom/<slug> \
+  | grep -v '^$'
+```
+
+If any are found:
+
+1. **List each expansion.** Display the path and reason for each `Scope-Expand` trailer.
+2. **Validate against denied paths.** Reject any expansion whose path matches a pattern in `scope.paths_denied` from AGENT.json.
+3. **Approve or reject per-expansion.** Each expansion is an independent decision. A rejected expansion means the file change must be reverted or extracted to a separate task before merge.
+4. **Proceed with merge** only after all expansions are resolved (approved or reverted).
+
+If no `Scope-Expand` trailers are present, proceed with the standard scope check and merge.
 
 ## Worker Injection Pattern
 

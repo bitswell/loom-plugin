@@ -1,6 +1,6 @@
 # LOOM Worker Template
 
-**Version**: 2.0.0-draft | **Protocol**: `loom/2` | **Status**: Draft
+**Version**: 2.0.0 | **Protocol**: `loom/2`
 
 A runnable guide for agents operating under LOOM v2. Follow these steps in order.
 The worktree is your workspace; commit messages are your protocol layer. No files
@@ -21,31 +21,22 @@ git log -1 --format='%B' HEAD
 ```
 
 The commit body is your task specification: objective, context, acceptance criteria.
-Read it completely before writing a single line of code.
-
-Also read AGENT.json for your configuration — scope, budget, dependencies:
-
-```bash
-cat ../AGENT.json
-```
-
-AGENT.json lives at `.mcagent/agents/<name>/<assignment>/AGENT.json`, one level above
-your worktree. The dispatch mechanism ensures it is readable at `../AGENT.json` from
-your working directory.
+Read it completely before writing a single line of code. All configuration — scope,
+budget, dependencies — is carried as trailers on that commit.
 
 **What you are looking for:**
 
-- `scope.paths_allowed` — the files you are permitted to change
-- `token_budget` — your total allowed spend; reserve 10% for the final commit
-- `dependencies` — assignments that must be COMPLETED before you may start work
-- `timeout_seconds` — heartbeat threshold; commit at least every 5 minutes
+- `Scope` trailer — the files you are permitted to change
+- `Budget` trailer — your total allowed spend; reserve 10% for the final commit
+- `Dependencies` trailer — assignments that must be COMPLETED before you may start work
+- Heartbeat cadence — commit at least every 5 minutes with a `Heartbeat` trailer
 
 ---
 
 ## 2. Check Dependencies
 
-If `dependencies` in AGENT.json is non-empty, verify each is COMPLETED before
-proceeding:
+If the `Dependencies` trailer on the ASSIGNED commit lists any deps, verify each
+is COMPLETED before proceeding:
 
 ```bash
 # Check a dependency's terminal status
@@ -82,9 +73,10 @@ for this commit to confirm the agent started.
 
 ## 4. Do the Work
 
-Make changes within your worktree. Stay within `scope.paths_allowed`. Commit
-regularly — at minimum every 5 minutes with a `Heartbeat` trailer. If you have
-no file changes to commit, use `--allow-empty` to keep the heartbeat alive.
+Make changes within your worktree. Stay within the `Scope` trailer from the
+ASSIGNED commit. Commit regularly — at minimum every 5 minutes with a `Heartbeat`
+trailer. If you have no file changes to commit, use `--allow-empty` to keep the
+heartbeat alive.
 
 **Every work commit:**
 
@@ -135,8 +127,9 @@ git log -1 \
   HEAD
 ```
 
-Re-read AGENT.json to confirm scope and budget. Resume from the last committed
-state — never re-do work that is already committed.
+The `git log` output above is the authoritative source for your scope, budget,
+and dependencies — re-read the ASSIGNED commit body to confirm them. Resume
+from the last committed state; never re-do work that is already committed.
 
 ---
 
@@ -191,7 +184,7 @@ Heartbeat: <ISO-8601 UTC>
 The orchestrator will resolve the blocker and resume you by committing additional
 context to your branch. When unblocked, make a new IMPLEMENTING commit and continue.
 
-**Resource limit blocker** (at 90% of `token_budget`):
+**Resource limit blocker** (at 90% of the `Budget` trailer):
 
 ```
 chore(<scope>): blocked -- resource limit
@@ -233,14 +226,14 @@ post-mortem — it will not be deleted.
 
 ## 9. Scope Enforcement
 
-You MUST NOT modify files outside `scope.paths_allowed` in AGENT.json. The
-orchestrator verifies scope at integration and will reject the branch if any
-commit touches a file outside scope.
+You MUST NOT modify files outside the `Scope` trailer on the ASSIGNED commit.
+The orchestrator verifies scope at integration and will reject the branch if
+any commit touches a file outside scope.
 
 If you discover mid-task that you need to modify out-of-scope files, commit
 BLOCKED and explain the scope expansion needed. Do not proceed.
 
-**Single-file exception:** If you need to modify exactly one file outside scope and can justify the change in a single sentence, you MAY add a `Scope-Expand: <path> -- <reason>` trailer to your work or completion commit instead of going BLOCKED. The path must not match `scope.paths_denied`. The orchestrator reviews each expansion at integration and may reject it. For bulk expansions (multiple unrelated out-of-scope files), use BLOCKED — `Scope-Expand` is for surgical, well-justified cases only.
+**Single-file exception:** If you need to modify exactly one file outside scope and can justify the change in a single sentence, you MAY add a `Scope-Expand: <path> -- <reason>` trailer to your work or completion commit instead of going BLOCKED. The orchestrator reviews each expansion at integration and may reject it. For bulk expansions (multiple unrelated out-of-scope files), use BLOCKED — `Scope-Expand` is for surgical, well-justified cases only.
 
 ---
 
@@ -258,9 +251,9 @@ BLOCKED and explain the scope expansion needed. Do not proceed.
 - Every commit: `Agent-Id` + `Session-Id`
 - While running: `Heartbeat` on every commit, at least every 5 minutes
 - Worktree: no protocol files of any kind — only deliverable code
-- Scope: never write outside `scope.paths_allowed`
-- Budget: reserve 10% of `token_budget` for the final commit
+- Scope: never write outside the `Scope` trailer
+- Budget: reserve 10% of the `Budget` trailer for the final commit
 
 ---
 
-*End of LOOM Worker Template v2.0.0-draft.*
+*End of LOOM Worker Template v2.0.0.*

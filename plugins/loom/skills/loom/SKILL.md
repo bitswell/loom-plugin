@@ -20,7 +20,7 @@ You ARE the LOOM orchestrator. You decompose tasks, spawn worker agents in isola
 7. Never force-push the workspace. The workspace only moves forward (monotonicity).
 8. Use `git worktree add` for isolation. Do NOT depend on any specific CLI tool beyond git.
 9. Dependencies MUST form a DAG. Reject cycles at assignment time.
-10. Validate scope at integration: reject commits that touch files outside the agent's `scope` from AGENT.json.
+10. Validate scope at integration: reject commits that touch files outside the agent's `Scope` trailer on the ASSIGNED commit.
 
 ## Core Flow
 
@@ -31,7 +31,7 @@ The 10-step orchestration sequence. The Agent tool is blocking, so use two-phase
  2. Decompose into sub-tasks. For each: assign agent-id, scope, dependencies, budget.
  3. Create worktrees:
       git worktree add .loom/agents/<agent-name>/worktrees/<org>_<repo>_<slug> -b loom/<slug>
- 4. Write AGENT.json into the assignment directory (parent of worktree). Commit task as ASSIGNED commit on the branch.
+ 4. Commit the task as an ASSIGNED commit on the branch with `Scope`, `Budget`, and `Dependencies` trailers.
  5. PLANNING PHASE: Spawn each worker via Agent tool.
       Read references/worker-template.md, substitute placeholders, pass as prompt.
       For parallel agents, put multiple Agent calls in the same message.
@@ -59,7 +59,7 @@ git log --format='%(trailers:key=Scope-Expand,valueonly)' loom/<slug> \
 If any are found:
 
 1. **List each expansion.** Display the path and reason for each `Scope-Expand` trailer.
-2. **Validate against denied paths.** Reject any expansion whose path matches a pattern in `scope.paths_denied` from AGENT.json.
+2. **Validate against denied paths.** Reject any expansion whose path matches a path declared denied at assignment.
 3. **Approve or reject per-expansion.** Each expansion is an independent decision. A rejected expansion means the file change must be reverted or extracted to a separate task before merge.
 4. **Proceed with merge** only after all expansions are resolved (approved or reverted).
 
@@ -74,7 +74,7 @@ Build the Agent tool prompt by reading and filling the worker template.
 3. Replace `{{AGENT_ID}}` with the agent's kebab-case ID.
 4. Replace `{{SESSION_ID}}` with a freshly generated UUID. Use `python3 -c "import uuid; print(uuid.uuid4())"`.
 5. For the **planning** spawn, append to the prompt:
-   `"This is your PLANNING phase. Read the ASSIGNED commit and AGENT.json. Write your plan in the body of an empty PLANNING commit (Task-Status: PLANNING). Then return. Do NOT implement. Do NOT write PLAN.md or any other protocol file to the worktree."`
+   `"This is your PLANNING phase. Read the ASSIGNED commit. Write your plan in the body of an empty PLANNING commit (Task-Status: PLANNING). Then return. Do NOT implement. Do NOT write PLAN.md or any other protocol file to the worktree."`
 6. For the **implementation** spawn, append:
    `"This is your IMPLEMENTATION phase. Your plan was approved. Read the PLANNING commit body from your branch history, implement the work, set Task-Status to COMPLETED, commit, and return."`
 
@@ -182,5 +182,5 @@ Detailed material lives in the reference files. Read them as needed.
 
 - `references/protocol.md` -- Full LOOM protocol: lifecycle states, operations, error model, security, observability.
 - `references/worker-template.md` -- Worker DNA template. Read this to build Agent tool prompts.
-- `references/schemas.md` -- All file format schemas: commit messages, trailers, branch naming, AGENT.json.
+- `references/schemas.md` -- All file format schemas: commit messages, trailers, branch naming.
 - `references/examples.md` -- Five worked end-to-end examples.

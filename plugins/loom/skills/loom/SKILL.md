@@ -184,3 +184,4 @@ Detailed material lives in the reference files. Read them as needed.
 - `references/worker-template.md` -- Worker DNA template. Read this to build Agent tool prompts.
 - `references/schemas.md` -- All file format schemas: commit messages, trailers, branch naming.
 - `references/examples.md` -- Five worked end-to-end examples.
+- `references/stacked-prs.md` -- Publishing a read-only stacked-PR projection of an integrated epic via the `stack-project` tool.
